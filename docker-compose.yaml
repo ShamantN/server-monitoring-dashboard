@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - timescale_data:/var/lib/postgresql/data
-      - ./DBConfig/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./db_config/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - telemetry-net
 
@@ -59,7 +59,7 @@ services:
   
   consumer:
     build:
-      context: ./Consumer
+      context: ./consumer
       dockerfile: Dockerfile.consumer
     image: samduckling/telemetry-consumer:latest
     container_name: telemetry_consumer
@@ -81,7 +81,7 @@ services:
     
   producer_node_1:
     build:
-      context: ./Producer
+      context: ./producer
       dockerfile: Dockerfile.producer
     image: samduckling/telemetry-producer:latest
     container_name: producer_node_1
@@ -97,7 +97,7 @@ services:
 
   producer_node_2:
     build:
-      context: ./Producer
+      context: ./producer
       dockerfile: Dockerfile.producer
     image: samduckling/telemetry-producer:latest
     container_name: producer_node_2
@@ -113,7 +113,7 @@ services:
 
   producer_node_3:
     build:
-      context: ./Producer
+      context: ./producer
       dockerfile: Dockerfile.producer
     image: samduckling/telemetry-producer:latest
     container_name: producer_node_3
@@ -124,6 +124,38 @@ services:
       KAFKA_FERNET_KEY: ${KAFKA_FERNET_KEY}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
       SERVER_ID: "NODE-3"
+    networks:
+      - telemetry-net
+
+  producer_node_4:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile.producer
+    image: samduckling/telemetry-producer:latest
+    container_name: producer_node_4
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_FERNET_KEY: ${KAFKA_FERNET_KEY}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      SERVER_ID: "NODE-4"
+    networks:
+      - telemetry-net
+
+  producer_node_5:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile.producer
+    image: samduckling/telemetry-producer:latest
+    container_name: producer_node_5
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_FERNET_KEY: ${KAFKA_FERNET_KEY}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      SERVER_ID: "NODE-5"
     networks:
       - telemetry-net
 
