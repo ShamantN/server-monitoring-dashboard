@@ -280,7 +280,7 @@ docker compose exec timescaledb psql -U postgres -d postgres -c \
 ### Inspect Kafka Topics
 To verify the Kafka topic and partition metadata:
 ```bash
-docker compose exec telemetry_kafka kafka-topics \
+docker exec telemetry_kafka kafka-topics \
   --bootstrap-server localhost:9092 \
   --describe --topic server-telemetry
 ```
