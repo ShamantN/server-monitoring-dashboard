@@ -1,5 +1,11 @@
 services:
   timescaledb:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     image: timescale/timescaledb:latest-pg16
     container_name: telemetry_timescaledb
     restart: unless-stopped
@@ -20,6 +26,12 @@ services:
     image: confluentinc/cp-kafka:7.6.0
     container_name: telemetry_kafka
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     ports: 
       - "9092:9092"
     environment:
@@ -50,7 +62,8 @@ services:
         GF_SECURITY_ADMIN_USER: admin
         GF_SECURITY_ADMIN_PASSWORD: admin
       depends_on:
-        - timescaledb
+        timescaledb:
+          condition: service_healthy
       volumes:
         - grafana_data:/var/lib/grafana
       networks:
@@ -65,8 +78,10 @@ services:
     container_name: telemetry_consumer
     restart: unless-stopped
     depends_on:
-      - kafka
-      - timescaledb
+      timescaledb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     environment:
       KAFKA_FERNET_KEY: ${KAFKA_FERNET_KEY}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
@@ -87,7 +102,8 @@ services:
     container_name: producer_node_1
     restart: unless-stopped
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
       KAFKA_FERNET_KEY: ${KAFKA_FERNET_KEY}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
@@ -103,7 +119,8 @@ services:
     container_name: producer_node_2
     restart: unless-stopped
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
       KAFKA_FERNET_KEY: ${KAFKA_FERNET_KEY}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
@@ -119,7 +136,8 @@ services:
     container_name: producer_node_3
     restart: unless-stopped
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
       KAFKA_FERNET_KEY: ${KAFKA_FERNET_KEY}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
@@ -135,7 +153,8 @@ services:
     container_name: producer_node_4
     restart: unless-stopped
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
       KAFKA_FERNET_KEY: ${KAFKA_FERNET_KEY}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
@@ -151,7 +170,8 @@ services:
     container_name: producer_node_5
     restart: unless-stopped
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
       KAFKA_FERNET_KEY: ${KAFKA_FERNET_KEY}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
