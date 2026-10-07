@@ -1,6 +1,6 @@
 # Real-Time Distributed Telemetry & Server Monitoring Pipeline
 
-An end-to-end, containerized telemetry streaming architecture that simulates distributed server nodes, encrypts system performance metrics at the edge, ingests high-throughput data via Apache Kafka (KRaft mode), stores time-series metrics in an optimized TimescaleDB hypertable, and visualizes live performance in Grafana[cite: 20, 26, 31].
+An end-to-end, containerized telemetry streaming architecture that simulates distributed server nodes, encrypts system performance metrics at the edge, ingests high-throughput data via Apache Kafka (KRaft mode), stores time-series metrics in an optimized TimescaleDB hypertable, and visualizes live performance in Grafana.
 
 ---
 
@@ -44,33 +44,33 @@ flowchart TD
 ## Core System Architecture
 
 ### 1. Edge Telemetry Harvesting (`producer.py`)
-Each simulated server node runs independently inside its own container[cite: 26]:
-- **Telemetry Collection:** Uses `psutil` to sample host hardware metrics every 1 second: CPU utilization percentage (`cpu_pct`), virtual memory usage percentage (`mem_pct`), network bytes received/sent (`net_in`, `net_out`), and total disk read/write throughput (`disk_io`)[cite: 31].
-- **Zero-Knowledge Wire Encryption:** Payloads are serialized to JSON and encrypted at the edge using Python's `cryptography.fernet` symmetric key cipher before dispatch[cite: 31]. The Kafka broker receives only encrypted byte buffers, preventing plaintext inspection[cite: 26, 31].
-- **Node Identity:** Injected dynamically using the `SERVER_ID` environment variable (`NODE-1`, `NODE-2`, `NODE-3`)[cite: 26, 31].
+Each simulated server node runs independently inside its own container:
+- **Telemetry Collection:** Uses `psutil` to sample host hardware metrics every 1 second: CPU utilization percentage (`cpu_pct`), virtual memory usage percentage (`mem_pct`), network bytes received/sent (`net_in`, `net_out`), and total disk read/write throughput (`disk_io`).
+- **Zero-Knowledge Wire Encryption:** Payloads are serialized to JSON and encrypted at the edge using Python's `cryptography.fernet` symmetric key cipher before dispatch. The Kafka broker receives only encrypted byte buffers, preventing plaintext inspection.
+- **Node Identity:** Injected dynamically using the `SERVER_ID` environment variable (`NODE-1`, `NODE-2`, `NODE-3`).
 
 ### 2. Message Streaming via Apache Kafka (KRaft Mode)
-- **ZooKeeper-Less Operation:** Powered by `confluentinc/cp-kafka:7.6.0` using the modern Kafka Raft (KRaft) consensus protocol (`KAFKA_PROCESS_ROLES: 'broker,controller'`), eliminating external ZooKeeper dependencies[cite: 26].
-- **Dynamic Topic Handling:** Ingests events into the `server-telemetry` topic via an internal bridge network (`telemetry-net`)[cite: 26, 31].
+- **ZooKeeper-Less Operation:** Powered by `confluentinc/cp-kafka:7.6.0` using the modern Kafka Raft (KRaft) consensus protocol (`KAFKA_PROCESS_ROLES: 'broker,controller'`), eliminating external ZooKeeper dependencies.
+- **Dynamic Topic Handling:** Ingests events into the `server-telemetry` topic via an internal bridge network (`telemetry-net`).
 
 ### 3. Decryption & Micro-Batch Ingestion Worker (`consumer.py`)
-- **Decryption:** Reads encrypted Kafka message values and decrypts them in memory via Fernet[cite: 25].
-- **Micro-Batch Buffering:** Implements a dual-trigger commit strategy to balance throughput and latency[cite: 25]:
-  - **Size Trigger:** Flushes when the buffer accumulates `KAFKA_BATCH_SIZE = 15` records[cite: 25].
-  - **Time Trigger:** Flushes every `FLUSH_INTERVAL = 5` seconds if low traffic prevents the buffer from filling[cite: 25].
-- **High-Performance Writes:** Uses `psycopg2.extras.execute_values` for bulk multi-row `INSERT` operations, minimizing database round-trips and transaction lock contention[cite: 25].
-- **Safe Offsets:** Offsets are committed synchronously to Kafka only after TimescaleDB issues a successful transaction commit (`enable.auto.commit = False`)[cite: 25].
+- **Decryption:** Reads encrypted Kafka message values and decrypts them in memory via Fernet.
+- **Micro-Batch Buffering:** Implements a dual-trigger commit strategy to balance throughput and latency:
+  - **Size Trigger:** Flushes when the buffer accumulates `KAFKA_BATCH_SIZE = 15` records.
+  - **Time Trigger:** Flushes every `FLUSH_INTERVAL = 5` seconds if low traffic prevents the buffer from filling.
+- **High-Performance Writes:** Uses `psycopg2.extras.execute_values` for bulk multi-row `INSERT` operations, minimizing database round-trips and transaction lock contention.
+- **Safe Offsets:** Offsets are committed synchronously to Kafka only after TimescaleDB issues a successful transaction commit (`enable.auto.commit = False`).
 
 ### 4. Time-Series Storage with TimescaleDB
-PostgreSQL 16 extended with the TimescaleDB engine[cite: 20, 26]:
-- **Hypertable Partitioning:** Converts `timescaleGrafanaServerMetrics` into a hypertable partitioned along the `ts` timestamp column with `chunk_time_interval => INTERVAL '10 minutes'`[cite: 20].
-- **Native Columnar Compression:** Segments data by `server_id` and orders by `ts DESC`[cite: 20]. An automated policy compresses chunks older than **1 hour**[cite: 20].
-- **Automated Data Retention:** Enforces a drop policy that discards raw metrics older than **2 days**[cite: 20].
+PostgreSQL 16 extended with the TimescaleDB engine:
+- **Hypertable Partitioning:** Converts `timescaleGrafanaServerMetrics` into a hypertable partitioned along the `ts` timestamp column with `chunk_time_interval => INTERVAL '10 minutes'`.
+- **Native Columnar Compression:** Segments data by `server_id` and orders by `ts DESC`. An automated policy compresses chunks older than **1 hour**.
+- **Automated Data Retention:** Enforces a drop policy that discards raw metrics older than **2 days**.
 
 ### 5. Real-Time Observability (Grafana)
-A containerized Grafana OSS service running on port 3000[cite: 26]:
-- Queries the TimescaleDB hypertable directly using `time_bucket('5 seconds', ts)` aggregations[cite: 29].
-- Displays 5 real-time panels: multi-series CPU trends, memory consumption graphs, network inbound/outbound gauges, and cumulative disk I/O metrics[cite: 29].
+A containerized Grafana OSS service running on port 3000:
+- Queries the TimescaleDB hypertable directly using `time_bucket('5 seconds', ts)` aggregations.
+- Displays 5 real-time panels: multi-series CPU trends, memory consumption graphs, network inbound/outbound gauges, and cumulative disk I/O metrics.
 
 ---
 
@@ -106,10 +106,10 @@ server-monitoring-dashboard/
 
 ## Pre-Built Docker Images
 
-Pre-built Docker images are published to Docker Hub under the `samduckling` namespace[cite: 26, 34]:
+Pre-built Docker images are published to Docker Hub under the `samduckling` namespace:
 
-- **Producer:** `samduckling/telemetry-producer:latest`[cite: 26, 34]
-- **Consumer:** `samduckling/telemetry-consumer:latest`[cite: 26, 34]
+- **Producer:** `samduckling/telemetry-producer:latest`
+- **Consumer:** `samduckling/telemetry-consumer:latest`
 
 ---
 
@@ -118,7 +118,7 @@ Pre-built Docker images are published to Docker Hub under the `samduckling` name
 ### 1. Prerequisites
 - [Docker Engine](https://docs.docker.com/engine/install/) (v24.0+)
 - [Docker Compose](https://docs.docker.com/compose/) (v2.20+)
-- Ports **3000**, **5432**, and **9092** must be free on the host machine[cite: 26].
+- Ports **3000**, **5432**, and **9092** must be free on the host machine.
 
 > **Linux Note:** If native PostgreSQL or Grafana services are running locally, stop them to avoid host port collisions:
 > ```bash
@@ -155,12 +155,12 @@ KAFKA_FERNET_KEY=<PASTE_YOUR_GENERATED_FERNET_KEY_HERE>
 ```
 
 ### 4. Launch the Cluster
-Start all 7 containers in detached mode[cite: 26]:
+Start all 7 containers in detached mode:
 ```bash
 docker compose up -d
 ```
 
-Verify that all services are running[cite: 26]:
+Verify that all services are running:
 ```bash
 docker compose ps
 ```
@@ -178,12 +178,12 @@ telemetry_timescaledb   timescale/timescaledb:latest-pg16       Up
 ```
 
 ### 5. Monitor Ingestion Logs
-Follow the consumer output to confirm decrypted micro-batches are being committed to TimescaleDB[cite: 25]:
+Follow the consumer output to confirm decrypted micro-batches are being committed to TimescaleDB:
 ```bash
 docker compose logs -f consumer
 ```
 
-Expected output[cite: 25]:
+Expected output:
 ```text
 Batch of size : 15 has been published to PostgreSQL, committed to Kafka and cleared from memory.
 ```
@@ -197,11 +197,11 @@ Open your browser and navigate to:
 ```text
 http://localhost:3000
 ```
-- **Username:** `admin`[cite: 26]
-- **Password:** `s181916k00bvyu8`[cite: 26]
+- **Username:** `admin`
+- **Password:** `admin`
 
 ### 2. Add the TimescaleDB Data Source
-1. In the left navigation menu, go to **Connections** $\to$ **Data sources** $\to$ click **Add data source**.
+1. In the left navigation menu, go to **Connections** -> **Data sources** -> click **Add data source**.
 2. Select **PostgreSQL**.
 3. Configure the following connection properties:
    - **Host URL:** `timescaledb:5432` *(Use the internal Docker DNS name)*
@@ -213,12 +213,12 @@ http://localhost:3000
 4. Click **Save & test**. You should see a green confirmation badge: *"Database Connection OK"*.
 
 ### 3. Import the Dashboard Model
-1. In the left menu, go to **Dashboards** $\to$ click the **New** dropdown (top-right) $\to$ **Import**.
-2. Click **Upload dashboard JSON file** and choose `GRAFANA_DASHBOARD_CONFIG.json`[cite: 29].
+1. In the left menu, go to **Dashboards** -> click the **New** dropdown (top-right) -> **Import**.
+2. Click **Upload dashboard JSON file** and choose `GRAFANA_DASHBOARD_CONFIG.json`.
 3. If prompted to map the PostgreSQL data source, select the `timescaledb` data source configured above.
 4. Click **Import**.
 
-The 5 monitoring panels will begin rendering real-time telemetry from `NODE-1`, `NODE-2`, and `NODE-3`[cite: 26, 29].
+The 5 monitoring panels will begin rendering real-time telemetry from `NODE-1`, `NODE-2`, and `NODE-3`.
 
 ---
 
@@ -252,10 +252,9 @@ SELECT add_compression_policy('timescaleGrafanaServerMetrics', INTERVAL '1 hour'
 -- Retention policy dropping records older than 2 days
 SELECT add_retention_policy('timescaleGrafanaServerMetrics', INTERVAL '2 days');
 ```
-[cite: 20]
 
 ### Sample Panel Query (CPU Usage)
-Downsamples high-frequency streaming events into 5-second averages using TimescaleDB's `time_bucket` function[cite: 29]:
+Downsamples high-frequency streaming events into 5-second averages using TimescaleDB's `time_bucket` function:
 ```sql
 SELECT
   time_bucket('5 seconds', ts) AS "time",
@@ -266,7 +265,6 @@ WHERE $__timeFilter(ts)
 GROUP BY 1, 2
 ORDER BY 1;
 ```
-[cite: 29]
 
 ---
 
@@ -305,4 +303,4 @@ docker compose down
 To stop containers and delete all persistent volumes (resetting TimescaleDB, Kafka, and Grafana storage):
 ```bash
 docker compose down -v
-``` 
+```
