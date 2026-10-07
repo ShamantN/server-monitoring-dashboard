@@ -78,17 +78,28 @@ A containerized Grafana OSS service running on port 3000[cite: 26]:
 
 ```text
 .
-├── .env.example                  # Environment variable template
-├── .gitignore                    # Git tracking ignore rules
-├── Dockerfile.consumer           # Consumer container build definition
-├── Dockerfile.producer           # Producer container build definition
-├── GRAFANA_DASHBOARD_CONFIG.json # Complete Grafana dashboard definition
-├── init.sql                      # TimescaleDB hypertable, compression & retention schema
-├── producer.py                   # System metric harvester & Fernet publisher
-├── consumer.py                   # Decryptor, micro-batch buffer & TimescaleDB loader
-├── requirements.txt              # Python runtime dependencies
-├── docker-compose.yaml           # Multi-service container orchestrator
-└── README.md                     # System documentation
+server-monitoring-dashboard/
+├── .env.example                  # Root: Compose auto-detects this
+├── .env                          # Root: Never committed to Git
+├── .gitignore
+├── docker-compose.yaml           # Root orchestrator
+├── README.md
+│
+├── producer/
+│   ├── Dockerfile                # Named simply "Dockerfile"
+│   ├── producer.py
+│   └── requirements.txt
+│
+├── consumer/
+│   ├── Dockerfile                # Named simply "Dockerfile"
+│   ├── consumer.py
+│   └── requirements.txt
+│
+├── db_config/
+│   └── init.sql                  # TimescaleDB schema & hypertable setup
+│
+└── grafana_config/
+    └── GRAFANA_DASHBOARD_CONFIG.json
 ```
 
 ---
