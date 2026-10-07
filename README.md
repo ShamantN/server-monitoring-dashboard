@@ -294,4 +294,4 @@ docker compose down
 To stop containers and delete all persistent volumes (resetting TimescaleDB, Kafka, and Grafana storage):
 ```bash
 docker compose down -v
-```
+``` 

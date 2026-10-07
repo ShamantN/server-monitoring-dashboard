@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - timescale_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./DBConfig/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - telemetry-net
 
@@ -48,7 +48,7 @@ services:
         - "3000:3000"
       environment:
         GF_SECURITY_ADMIN_USER: admin
-        GF_SECURITY_ADMIN_PASSWORD: s181916k00bvyu8
+        GF_SECURITY_ADMIN_PASSWORD: admin
       depends_on:
         - timescaledb
       volumes:
@@ -58,6 +58,9 @@ services:
   
   
   consumer:
+    build:
+      context: ./Consumer
+      dockerfile: Dockerfile.consumer
     image: samduckling/telemetry-consumer:latest
     container_name: telemetry_consumer
     restart: unless-stopped
@@ -77,6 +80,9 @@ services:
 
     
   producer_node_1:
+    build:
+      context: ./Producer
+      dockerfile: Dockerfile.producer
     image: samduckling/telemetry-producer:latest
     container_name: producer_node_1
     restart: unless-stopped
@@ -90,6 +96,9 @@ services:
       - telemetry-net
 
   producer_node_2:
+    build:
+      context: ./Producer
+      dockerfile: Dockerfile.producer
     image: samduckling/telemetry-producer:latest
     container_name: producer_node_2
     restart: unless-stopped
@@ -103,6 +112,9 @@ services:
       - telemetry-net
 
   producer_node_3:
+    build:
+      context: ./Producer
+      dockerfile: Dockerfile.producer
     image: samduckling/telemetry-producer:latest
     container_name: producer_node_3
     restart: unless-stopped
