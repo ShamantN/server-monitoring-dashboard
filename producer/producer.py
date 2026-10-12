@@ -33,7 +33,8 @@ producer = Producer(conf)
 
 def delivery_report(err, msg):
     if err:
-        raise Exception(f"Message delivery failed: {err}")
+        print(f"Message delivery of below message failed with error : {err}")
+        print(f"Topic : {msg.topic()} Partition : {msg.partition()} Offset : {msg.offset()}\n")
     else:
         print(f"Message Delivered to topic : {msg.topic()} Partition : {msg.partition()} Offset : {msg.offset()}\n")
 

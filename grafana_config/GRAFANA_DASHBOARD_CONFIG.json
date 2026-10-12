@@ -4,18 +4,19 @@
   "metadata": {
     "name": "adt6l6t",
     "namespace": "default",
-    "uid": "ccef3c8a-9a19-40d1-95ad-98ea73596950",
-    "resourceVersion": "1791189295522986",
-    "generation": 36,
-    "creationTimestamp": "2026-10-02T15:13:29Z",
+    "uid": "2e5f67c7-7d37-4b4f-b77d-c669fa7c899f",
+    "resourceVersion": "1791212687786007",
+    "generation": 10,
+    "creationTimestamp": "2026-10-05T10:56:46Z",
     "labels": {
-      "grafana.app/deprecatedInternalID": "2816244559192064"
+      "grafana.app/deprecatedInternalID": "3881410481774592"
     },
     "annotations": {
-      "grafana.app/createdBy": "user:efzu0ilt1hslce",
-      "grafana.app/saved-from-ui": "Grafana v13.2.3 (90ffed056f)",
-      "grafana.app/updatedBy": "user:efzu0ilt1hslce",
-      "grafana.app/updatedTimestamp": "2026-10-05T08:34:55Z"
+      "grafana.app/createdBy": "user:bg0aykieidtdsf",
+      "grafana.app/folder": "",
+      "grafana.app/saved-from-ui": "Grafana v13.0.2 (3fcdbc5a)",
+      "grafana.app/updatedBy": "user:bg0aykieidtdsf",
+      "grafana.app/updatedTimestamp": "2026-10-05T15:04:47Z"
     }
   },
   "spec": {
@@ -71,8 +72,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1,
-          "title": "CPU_PCT",
-          "description": "",
+          "title": "AVG CPU USAGE",
+          "description": "Measures the average CPU usage for each node every 5 seconds",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -86,7 +87,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "fg0azbeadwwa8a"
+                        "name": "fg0azbnadbwu8a"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -125,7 +126,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.3",
+            "version": "13.0.2",
             "spec": {
               "options": {
                 "annotations": {
@@ -133,6 +134,7 @@
                   "lines": {
                     "width": 2
                   },
+                  "multiLane": false,
                   "regions": {
                     "opacity": 0.1
                   }
@@ -219,8 +221,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2,
-          "title": "MEM_PCT",
-          "description": "",
+          "title": "AVG MEM USAGE",
+          "description": "Measures the average MEM usage for each node every 5 seconds",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -234,7 +236,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "fg0azbeadwwa8a"
+                        "name": "fg0azbnadbwu8a"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -273,9 +275,13 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "timeseries",
-            "version": "13.2.3",
+            "version": "13.0.2",
             "spec": {
               "options": {
+                "annotations": {
+                  "clustering": -1,
+                  "multiLane": false
+                },
                 "legend": {
                   "calcs": [],
                   "displayMode": "table",
@@ -358,8 +364,8 @@
         "kind": "Panel",
         "spec": {
           "id": 3,
-          "title": "AVG_NET_IN",
-          "description": "",
+          "title": "AVG NET IN",
+          "description": "Measures the average Bytes/sec received by each node every 5 seconds",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -373,7 +379,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "fg0azbeadwwa8a"
+                        "name": "fg0azbnadbwu8a"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -412,7 +418,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "gauge",
-            "version": "13.2.3",
+            "version": "13.0.2",
             "spec": {
               "options": {
                 "barShape": "flat",
@@ -482,8 +488,8 @@
         "kind": "Panel",
         "spec": {
           "id": 4,
-          "title": "AVG_NET_OUT",
-          "description": "",
+          "title": "AVG NET OUT",
+          "description": "Measures the average Bytes/sec transmitted by each node every 5 seconds",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -497,7 +503,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "fg0azbeadwwa8a"
+                        "name": "fg0azbnadbwu8a"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -536,7 +542,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "gauge",
-            "version": "13.2.3",
+            "version": "13.0.2",
             "spec": {
               "options": {
                 "barShape": "flat",
@@ -605,8 +611,8 @@
         "kind": "Panel",
         "spec": {
           "id": 5,
-          "title": "AVG_DISK_IO",
-          "description": "",
+          "title": "AVG DISK IO",
+          "description": "Measures the total bytes read from and written to disk every 5 seconds for each node",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -620,7 +626,7 @@
                       "group": "grafana-postgresql-datasource",
                       "version": "v0",
                       "datasource": {
-                        "name": "fg0azbeadwwa8a"
+                        "name": "fg0azbnadbwu8a"
                       },
                       "spec": {
                         "dataset": "postgres",
@@ -659,7 +665,7 @@
           "vizConfig": {
             "kind": "VizConfig",
             "group": "stat",
-            "version": "13.2.3",
+            "version": "13.0.2",
             "spec": {
               "options": {
                 "colorMode": "background",

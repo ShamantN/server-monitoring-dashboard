@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import execute_values
-from confluent_kafka import Consumer, KafkaException
+from confluent_kafka import Producer, Consumer, KafkaException
 from cryptography.fernet import Fernet
 import os
 import json
@@ -36,6 +36,13 @@ conf = {
     'enable.auto.commit' : False
 }
 
+producer_conf = {
+    'bootstrap.servers' : os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
+    'client.id' : 'producer-2',
+    'acks' : 'all',
+    'retries' : 3
+}
+
 def on_assign(consumer, partitions):
     print(f"Partitions assigned: \n")
     for p in partitions:
@@ -47,7 +54,14 @@ def on_revoke(consumer, partitions):
     for p in partitions:
         print(f"Partition: {p.partition}, Offset: {p.offset}")
     consumer.commit(asynchronous=False)
-    
+
+try:
+    producer = Producer(producer_conf)
+
+except KafkaException as e:
+    print(f"Error initializing Kafka producer: {e}\n")
+    raise Exception("Failed to initialize Kafka producer\n")
+
 try:
     consumer = Consumer(conf)
     consumer.subscribe(['server-telemetry'], on_assign=on_assign, on_revoke=on_revoke)
@@ -72,7 +86,12 @@ def get_db_connection():
 conn = get_db_connection()
 cursor = conn.cursor()
 
-
+def delivery_report(err, msg):
+    if err:
+        print(f"Message delivery of below message failed with error : {err}")
+        print(f"Topic : {msg.topic()} Partition : {msg.partition()} Offset : {msg.offset()}\n")
+    else:
+        print(f"Message Delivered to topic : {msg.topic()} Partition : {msg.partition()} Offset : {msg.offset()}\n")
 
 def publish_data(batch):
 
@@ -110,8 +129,14 @@ def process_data():
                 print(f"Consumer error : {msg.error()}")
                 continue
 
-            data = json.loads(fernet.decrypt(msg.value()).decode("utf-8"))
-            key = (data['server_id'], data['ts'])
+            try:
+                data = json.loads(fernet.decrypt(msg.value()).decode("utf-8"))
+                key = (data['server_id'], data['ts'])
+            except Exception as decoding_error:
+                print("Error occured while decoding received message : ", decoding_error)
+                producer.produce(topic = "server-telemetry-dlq", key = msg.key(), value = msg.value(), on_delivery=delivery_report)
+                producer.poll(0)
+                continue
 
             server_id, ts = key
             cpu_pct = data['cpu_pct']

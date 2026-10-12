@@ -61,11 +61,16 @@ services:
       environment:
         GF_SECURITY_ADMIN_USER: admin
         GF_SECURITY_ADMIN_PASSWORD: admin
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       depends_on:
         timescaledb:
           condition: service_healthy
       volumes:
         - grafana_data:/var/lib/grafana
+        - ./grafana_config/provisioning:/etc/grafana/provisioning:ro
+        - ./grafana_config/GRAFANA_DASHBOARD_CONFIG.json:/etc/grafana/dashboards/dashboard.json:ro
       networks:
         - telemetry-net
   
